@@ -61,7 +61,9 @@ async def perform_scan(object_data, username):
         - False: If the account does not exist.
     """
 
-    async with aiohttp.ClientSession() as session:
+    headers = object_data.get('headers', {})
+
+    async with aiohttp.ClientSession(headers=headers) as session:
         try:
             async with session.get(object_data['link'].format(username)) as response:
                 if response.status != 200: return False
@@ -81,8 +83,8 @@ async def perform_scan(object_data, username):
 async def main():
     username = input('\033[1;97mEnter the username you want to search:\033[0m ')
     print("\u001b[34;1mStart Scan \u001b[34;0m\n")
-    results = {}
-    
+    results = {}    
+
      # Perform the scan for each URL in the URLS dictionary.
     for url in URLS:
         results[url] = await perform_scan(URLS[url], username)

@@ -1,3 +1,5 @@
+from fake_useragent import UserAgent
+
 URLS = {
     "instagram": {
         "link": "https://www.instagram.com/{}/",
@@ -28,7 +30,26 @@ URLS = {
     "github" : {
         "link" : "https://github.com/{}"
     },
-    "spotify" : {
+    "reddit" : {
+        "link" : "https://www.reddit.com/user/{}/",
+        "findable": "faceplate-tracker",
+        "soup_data" : {
+            "source": "profile"
+        }
+    },
+    "spotify": {
         "link" : "https://open.spotify.com/user/{}"
-    }
+    },
+    "wattpad": {
+        "link" : "https://wattpad.com/user/{}",
+        "headers" : {
+            "User-Agent": UserAgent().random
+        }
+    },
+    "twitch": {
+        "link" : "https://passport.twitch.tv/usernames/{}",
+        "headers": {
+            "Connection" : "close"
+        }
+    },
 }
