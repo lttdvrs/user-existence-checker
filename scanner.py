@@ -121,14 +121,13 @@ async def main():
     print("\u001b[34;1mStart Scan \u001b[34;0m\n")
     results = {}    
 
-    s = await discord(URLS, username)
-     # Perform the scan for each URL in the URLS dictionary.
-    # for url in URLS:
-    #     type = URLS[url].get('type', None)
-    #     if type and type == 1:
-    #         results[url] = await perform_chrome_scan(URLS[url], username)
-    #     else:
-    #         results[url] = await perform_http_scan(URLS[url], username)
+    # Perform the scan for each URL in the URLS dictionary.
+    for url in URLS:
+        type = URLS[url].get('type', None)
+        if type and type == 1:
+            results[url] = await perform_chrome_scan(URLS[url], username)
+        else:
+            results[url] = await perform_http_scan(URLS[url], username)
 
     # Prints the results from the scan, with the correct values and colors.
     for key in results:
