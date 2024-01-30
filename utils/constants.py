@@ -1,4 +1,8 @@
 from fake_useragent import UserAgent
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 URLS = {
     "instagram": {
@@ -37,6 +41,11 @@ URLS = {
             "source": "profile"
         }
     },
+    # "youtube" : {
+    #     "api_key": os.environ.get("YOUTUBE_API_V3_KEY"),
+    #     "link" : "https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q={}&key={}",
+    #     "requires_api_key": 1
+    # },
     "spotify": {
         "link" : "https://open.spotify.com/user/{}"
     },
@@ -52,4 +61,8 @@ URLS = {
             "Connection" : "close"
         }
     },
+    "linkedin": {
+        "type": 1,
+        "link" : "https://www.linkedin.com/in/{}/"
+    }
 }

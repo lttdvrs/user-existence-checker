@@ -4,6 +4,12 @@ from bs4 import BeautifulSoup
 import json
 from utils.helpers import *
 from utils.constants import URLS
+import soundex
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.common.exceptions import WebDriverException
 
 async def parser(response, findable, **kwargs):
     """
@@ -47,8 +53,38 @@ async def perform_deeper_search(parsed_data, key):
         return False
 
 
+async def perform_chrome_scan(object_data, username):
+    """
+    Uses ChromeDriver via Selenium to simulate a web browser for verifying the existence of a user account.
 
-async def perform_scan(object_data, username):
+    Input:
+        - object_data: Dictionary containing all the parameters to perform the scan.
+        - username: The given username to perfom the scan on.
+
+    Output:
+        - True: If the account searched on exists.
+        - False: If the account does not exist.
+    """
+
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    try: 
+        driver.get(object_data["link"].format(username))
+        s = soundex.getInstance()
+        return s.soundex(driver.title.lower()) != s.soundex("profile not found | linkedin")
+    except WebDriverException as e:
+        return False
+    finally:
+        driver.quit()
+
+
+
+async def perform_http_scan(object_data, username):
     """
     Checks the output of an HTTP request to determine the existence of a user account.
 
@@ -79,21 +115,27 @@ async def perform_scan(object_data, username):
         except aiohttp.ClientError:
             return False
 
-    
+
 async def main():
     username = input('\033[1;97mEnter the username you want to search:\033[0m ')
     print("\u001b[34;1mStart Scan \u001b[34;0m\n")
     results = {}    
 
+    s = await discord(URLS, username)
      # Perform the scan for each URL in the URLS dictionary.
-    for url in URLS:
-        results[url] = await perform_scan(URLS[url], username)
+    # for url in URLS:
+    #     type = URLS[url].get('type', None)
+    #     if type and type == 1:
+    #         results[url] = await perform_chrome_scan(URLS[url], username)
+    #     else:
+    #         results[url] = await perform_http_scan(URLS[url], username)
 
     # Prints the results from the scan, with the correct values and colors.
     for key in results:
         value = '\033[91mUnregistered\033[0m' if results[key] is False else '\033[32mRegistered\033[0m'
         print(f"\033[1;97m    - {key}:\033[0m {value}")
     print("\n")
+
 
 
 if __name__ == "__main__":
