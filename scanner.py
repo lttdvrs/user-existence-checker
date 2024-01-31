@@ -4,12 +4,12 @@ from bs4 import BeautifulSoup
 import json
 from utils.helpers import *
 from utils.constants import URLS
-import soundex
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import WebDriverException
+import time
 
 async def parser(response, findable, **kwargs):
     """
@@ -53,7 +53,7 @@ async def perform_deeper_search(parsed_data, key):
         return False
 
 
-async def perform_chrome_scan(object_data, username):
+async def perform_chrome_scan(object_data, username, function_to_call):
     """
     Uses ChromeDriver via Selenium to simulate a web browser for verifying the existence of a user account.
 
@@ -73,15 +73,16 @@ async def perform_chrome_scan(object_data, username):
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
-    try: 
+    try:
         driver.get(object_data["link"].format(username))
-        s = soundex.getInstance()
-        return s.soundex(driver.title.lower()) != s.soundex("profile not found | linkedin")
+        func = globals().get(function_to_call) 
+
+        # Call the right function and functionality for the Chrome Scan
+        return await func(driver)
     except WebDriverException as e:
         return False
     finally:
         driver.quit()
-
 
 
 async def perform_http_scan(object_data, username):
@@ -125,13 +126,13 @@ async def main():
     for url in URLS:
         type = URLS[url].get('type', None)
         if type and type == 1:
-            results[url] = await perform_chrome_scan(URLS[url], username)
+            results[url] = await perform_chrome_scan(URLS[url], username, url)
         else:
             results[url] = await perform_http_scan(URLS[url], username)
 
     # Prints the results from the scan, with the correct values and colors.
     for key in results:
-        value = '\033[91mUnregistered\033[0m' if results[key] is False else '\033[32mRegistered\033[0m'
+        value = await make_return_values(results[key])
         print(f"\033[1;97m    - {key}:\033[0m {value}")
     print("\n")
 
@@ -149,6 +150,8 @@ if __name__ == "__main__":
     \033[0m''')
 
      # Run the main function asynchronously
+    start = time.time()
     asyncio.run(main())
     
     print("\u001b[34;1mEnd Scan \u001b[0m")
+    print(f"\x1B[3mScan time: {time.time() - start}\x1B[0m")

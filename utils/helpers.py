@@ -1,3 +1,9 @@
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import soundex
+
 def find_key(data, target_key):
     """
     Recursive search for target_key in the JSON data.
@@ -22,3 +28,58 @@ def find_key(data, target_key):
             if find_key(item, target_key):
                 return True
     return False
+
+
+async def linkedin(driver): 
+    """
+    Helper function to use inside scanner function perform_chrome_scan()
+
+    Checks the title of a LinkedIn profile page to determine the existence of a user account.
+
+    Input:
+        - driver: WebDriver instance to work with the webpage.
+
+    Output:
+        - True: If the account searched on exists.
+        - False: If the account does not exist.
+    """
+
+    s = soundex.getInstance()
+    authwall = driver.find_element(By.XPATH, '//meta[@content="/authwall"]')
+    if authwall: return "\033[33mAuthwall Issue\033[0m"
+    return s.soundex(driver.title.lower()) != s.soundex("profile not found | linkedin")
+
+
+async def discord(driver):
+    """
+    Helper function to use inside scanner function perform_chrome_scan()
+
+    Tries the register input field of Discord to fill in the username we are looking for, 
+    and determine the existence of a user account.
+
+    Input:
+        - driver: WebDriver instance to work with the webpage.
+
+    Output:
+        - True: If the account searched on exists.
+        - False: If the account does not exist.
+    """
+
+    username_field = driver.find_element(By.XPATH, '//input[@name="username"]')
+    if username_field: 
+        username_field.send_keys("scrqpting")
+        try:
+            WebDriverWait(driver, 2).until(
+                EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'Username is unavailable')]"))
+            )
+            return True
+        except TimeoutException:
+            return False
+        
+async def make_return_values(key):
+    if key == True:
+        return "\033[32mRegistered\033[0m"
+    if key == False:
+        return "\033[91mUnregistered\033[0m"
+    else:
+        return f"{key}"
