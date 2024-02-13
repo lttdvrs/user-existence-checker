@@ -72,13 +72,12 @@ async def perform_chrome_scan(object_data, username, function_to_call):
 
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
-
+    
     try:
-        driver.get(object_data["link"].format(username))
+        driver.get(object_data["link"].format(username))        
         func = globals().get(function_to_call) 
-
         # Call the right function and functionality for the Chrome Scan
-        return await func(driver)
+        return await func(driver, username)
     except WebDriverException as e:
         return False
     finally:
@@ -121,7 +120,7 @@ async def main():
     username = input('\033[1;97mEnter the username you want to search:\033[0m ')
     print("\u001b[34;1mStart Scan \u001b[34;0m\n")
     results = {}    
-
+    start = time.time()
     # Perform the scan for each URL in the URLS dictionary.
     for url in URLS:
         type = URLS[url].get('type', None)
@@ -134,9 +133,7 @@ async def main():
     for key in results:
         value = await make_return_values(results[key])
         print(f"\033[1;97m    - {key}:\033[0m {value}")
-    print("\n")
-
-
+    print(f"\x1B[3mScan time: {time.time() - start}\x1B[0m")
 
 if __name__ == "__main__":
     print('''\033[1;95m
@@ -149,9 +146,6 @@ if __name__ == "__main__":
                                                                         
     \033[0m''')
 
-     # Run the main function asynchronously
-    start = time.time()
+    # Run the main function asynchronously
     asyncio.run(main())
-    
     print("\u001b[34;1mEnd Scan \u001b[0m")
-    print(f"\x1B[3mScan time: {time.time() - start}\x1B[0m")
