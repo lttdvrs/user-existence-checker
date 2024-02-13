@@ -50,7 +50,7 @@ async def linkedin(driver):
     return s.soundex(driver.title.lower()) != s.soundex("profile not found | linkedin")
 
 
-async def discord(driver):
+async def discord(driver, username):
     """
     Helper function to use inside scanner function perform_chrome_scan()
 
@@ -64,17 +64,23 @@ async def discord(driver):
         - True: If the account searched on exists.
         - False: If the account does not exist.
     """
+    try:
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.XPATH, '//input[@name="username"]'))
+        )
+        username_field = driver.find_element(By.XPATH, '//input[@name="username"]')
+        if username_field: 
+            username_field.send_keys(username)
+            try:
+                WebDriverWait(driver, 3).until(
+                    EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'Username is unavailable')]"))
+                )
+                return True
+            except TimeoutException:
+                return False
+    except TimeoutException:
+        return False
 
-    username_field = driver.find_element(By.XPATH, '//input[@name="username"]')
-    if username_field: 
-        username_field.send_keys("scrqpting")
-        try:
-            WebDriverWait(driver, 2).until(
-                EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'Username is unavailable')]"))
-            )
-            return True
-        except TimeoutException:
-            return False
         
 async def make_return_values(key):
     if key == True:

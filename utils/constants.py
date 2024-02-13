@@ -64,4 +64,14 @@ URLS = {
         "type": 1,
         "link" : "https://www.linkedin.com/in/{}/"
     },
+    "chess.com": {
+        "link" : "https://www.chess.com/member/{}"
+    },
+    "steam" : {
+        "link": "https://steamcommunity.com/id/{}",
+        "findable": "div",
+        "soup_data": {
+            "class": "profile_header"
+        }
+    }
 }
